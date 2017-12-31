@@ -4,7 +4,7 @@ module QuanTemplateTest.Main
 
 open System
 
-open QuanTemplateTest.OrderBook
+open QuanTemplateTest.ArrayBasedOrderBook
 
 [<EntryPoint>]
 let main argv = 

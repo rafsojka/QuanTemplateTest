@@ -49,7 +49,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="OrderBookUpdate.fs" />
+    <Compile Include="OrderBookEntry.fs" />
     <Compile Include="OrderBook.fs" />
+    <Compile Include="ArrayBasedOrderBook.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>
