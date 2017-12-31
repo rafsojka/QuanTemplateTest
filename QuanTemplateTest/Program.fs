@@ -48,19 +48,35 @@ type OrderBookEntry =
 let updateOrderBook orderBookUpdate (orderBook:OrderBookEntry []) tickSize =
     orderBook.[orderBookUpdate.PriceLevelIndex - 1] <- OrderBookEntry.Update ((decimal)orderBookUpdate.Price * tickSize) orderBookUpdate.Quantity
 
+let updateOrderBook2 orderBookUpdate tickSize (orderBook:OrderBookEntry [])  =
+    Array.set orderBook (orderBookUpdate.PriceLevelIndex - 1) (OrderBookEntry.Update ((decimal)orderBookUpdate.Price * tickSize) orderBookUpdate.Quantity)
+    orderBook
+
 // O(n)
 // to improve look at 
 // https://hamberg.no/erlend/posts/2012-08-29-purely-functional-random-access-list.html
 // https://gist.github.com/kos59125/3721051
 let insertIntoOrderBook orderBookUpdate (orderBook:OrderBookEntry []) tickSize =
-    //orderBook |> Array.iteri (fun idx elem -> if(idx > orderBookUpdate.PriceLevelIndex-1) then orderBook.[idx] <- orderBook.[idx - 1])
-//    for i in orderBookUpdate.PriceLevelIndex .. orderBook.Length-1 do
-//        orderBook.[i] <- orderBook.[i - 1]
     for i in orderBook.Length-1 .. -1 .. orderBookUpdate.PriceLevelIndex  do
         orderBook.[i] <- orderBook.[i - 1]
 
     orderBook.[orderBookUpdate.PriceLevelIndex - 1] <- OrderBookEntry.Update ((decimal)orderBookUpdate.Price * tickSize) orderBookUpdate.Quantity
-    
+
+// O(n)
+// to improve look at 
+// https://hamberg.no/erlend/posts/2012-08-29-purely-functional-random-access-list.html
+// https://gist.github.com/kos59125/3721051
+let insertIntoOrderBook2 orderBookUpdate (orderBook:OrderBookEntry []) tickSize =
+    orderBook 
+    |> Array.rev
+    |> Array.mapi (
+        fun idx elem -> 
+            match idx with
+            | idx when idx < (orderBook.Length - orderBookUpdate.PriceLevelIndex) -> orderBook.[idx + 1]
+            | _ -> elem )
+    |> Array.rev
+    |> updateOrderBook2 orderBookUpdate tickSize
+
 // O(n)
 let deleteFromOrderBook orderBookUpdate (orderBook:OrderBookEntry []) =
     orderBook |> Array.iteri (fun idx elem -> 
@@ -69,6 +85,17 @@ let deleteFromOrderBook orderBookUpdate (orderBook:OrderBookEntry []) =
                                                         orderBook.[idx] <- orderBook.[idx + 1]
                                                 else
                                                     orderBook.[idx] <- OrderBookEntry.Default)
+
+// O(n)
+let deleteFromOrderBook2 orderBookUpdate (orderBook:OrderBookEntry []) =
+
+    orderBook 
+    |> Array.mapi (
+        fun idx elem -> 
+                        match idx with
+                        | idx when idx = (orderBook.Length - 1) -> OrderBookEntry.Default
+                        | idx when idx >= (orderBookUpdate.PriceLevelIndex - 1) -> orderBook.[idx + 1]
+                        | _ -> elem )
 
 [<EntryPoint>]
 let main argv = 
