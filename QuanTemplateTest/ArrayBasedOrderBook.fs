@@ -4,15 +4,28 @@ open QuanTemplateTest.OrderBookUpdate
 open QuanTemplateTest.OrderBookEntry
 open QuanTemplateTest.OrderBook
 
+// time complexities:
+// update - O(1)
+// insert - O(N) - needs to right shift all elements after the insert index
+// delete - O(N) - needs to left shift all elements after the delete index
+
+// considered improvements:
+//
+// 1. random access list - O(log N) for update, insert and delete still O(N)??
+// https://hamberg.no/erlend/posts/2012-08-29-purely-functional-random-access-list.html
+// https://gist.github.com/kos59125/3721051
+//
+// 2. .NET SortedDictionary - Scala TreeMap
+// https://github.com/ezhulenev/scala-openbook/blob/master/src/main/scala/com/scalafi/openbook/orderbook/OrderBook.scala
+// https://quant.stackexchange.com/questions/1379/implementing-data-structures-in-a-limit-order-book
+// http://www.fssnip.net/2i/title/Sorted-Map - pure F# SortedMap
+
 // O(1)
 let updateOrderBook orderBookUpdate tickSize (orderBook:OrderBookEntry [])  =
     Array.set orderBook (orderBookUpdate.PriceLevelIndex - 1) (OrderBookEntry.Update ((decimal)orderBookUpdate.Price * tickSize) orderBookUpdate.Quantity)
     orderBook
 
-// O(n)
-// to improve look at 
-// https://hamberg.no/erlend/posts/2012-08-29-purely-functional-random-access-list.html
-// https://gist.github.com/kos59125/3721051
+// O(N)
 let insertIntoOrderBook orderBookUpdate tickSize (orderBook:OrderBookEntry [])  =
     orderBook 
     |> Array.rev
@@ -24,7 +37,7 @@ let insertIntoOrderBook orderBookUpdate tickSize (orderBook:OrderBookEntry [])  
     |> Array.rev
     |> updateOrderBook orderBookUpdate tickSize
 
-// O(n)
+// O(N)
 let deleteFromOrderBook orderBookUpdate (orderBook:OrderBookEntry []) =
 
     orderBook 
